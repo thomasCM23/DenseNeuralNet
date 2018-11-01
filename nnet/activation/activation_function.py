@@ -70,3 +70,12 @@ class Elu(ActivationFunc):
         Z[Z < 0] = self.leaks * np.exp(Z)
         Z[Z >= 0] = 1
         return Z
+
+
+class Linear(ActivationFunc):
+
+    def function(self, Z):
+        return Z
+
+    def derivative(self, Z):
+        return 1
