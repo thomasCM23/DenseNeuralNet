@@ -1,7 +1,12 @@
-from nnet.activation import Sigmoid
+from nnet.math import Sigmoid
 import numpy as np
+from abc import ABCMeta, abstractmethod
 
-class Hidden:
+class Layer(metaclass=ABCMeta):
+    pass
+
+
+class Hidden(Layer):
 
     def __init__(self, numUnitsPrevLayer, numUnits, initilization="he", activation=Sigmoid, name=None):
 
@@ -12,6 +17,7 @@ class Hidden:
         else:
             initVal = 0.1
 
+        self.shape = (numUnits, numUnitsPrevLayer)
         self.W = np.random.randn(numUnits, numUnitsPrevLayer) * initVal
         self.b = np.zeros(shape=(numUnits, 1))
         self.activation = activation
@@ -19,3 +25,11 @@ class Hidden:
         self.Z, self.A = None, None
         self.dW, self.db, self.dZ, self.dA = None, None, None, None
 
+
+class Input(Layer):
+
+    def __init__(self, shape=(None, 1), name=None):
+        self.shape = shape
+        self.name = name
+        self.Z, self.A = None, None
+        self.dW, self.db, self.dZ, self.dA = None, None, None, None

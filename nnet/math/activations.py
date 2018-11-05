@@ -1,16 +1,5 @@
-from abc import ABCMeta, abstractmethod
+from nnet.math.functions import ActivationFunc
 import numpy as np
-
-class ActivationFunc(metaclass=ABCMeta):
-
-    @abstractmethod
-    def function(self, Z):
-        pass
-
-    @abstractmethod
-    def derivative(self, Z):
-        pass
-
 
 class Sigmoid(ActivationFunc):
 
