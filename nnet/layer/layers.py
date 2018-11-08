@@ -24,6 +24,8 @@ class Hidden(Layer):
         self.name = name
         self.Z, self.A = None, None
         self.dW, self.db, self.dZ, self.dA = None, None, None, None
+        self.vdW, self.vdb = np.zeros(shape=self.W.shape), np.zeros(shape=self.b.shape)
+        self.sdW, self.sdb = np.zeros(shape=self.W.shape), np.zeros(shape=self.b.shape)
 
 
 class Input(Layer):

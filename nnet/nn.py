@@ -2,12 +2,14 @@ from nnet.math import Sigmoid
 from nnet.math import CrossEntropyLoss
 from nnet.layer import Hidden
 from nnet.layer import Input
+from nnet.optimizer import GradientDescent
 import numpy as np
 import warnings
 
 class Net:
 
-    def __init__(self, regularizationType="L2", lamdba=0.1, optimizer="adam", cost_function=CrossEntropyLoss):
+    def __init__(self, regularizationType=None, lamdba=0.1, optimizer=GradientDescent(learning_rate=0.01),
+                 cost_function=CrossEntropyLoss):
         self.regularization = regularizationType
         self.lamdba = lamdba
         self.layers = {}
