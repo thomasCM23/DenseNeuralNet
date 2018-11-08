@@ -3,9 +3,12 @@ import numpy as np
 
 class CrossEntropyLoss(ActivationFunc):
 
-    def function(self, Z):
-        return 1 / ( 1 + np.exp(-Z))
+    def __init__(self):
+        pass
 
-    def derivative(self, Z):
-        s = self.function(Z)
-        return s * (1-s)
+    def function(self, Z):
+        logprobs = np.multiply(np.log(Z["AL"]), Z["Y"]) + np.multiply((1 - Z["Y"]), np.log(1 - Z["AL"]))
+        return -(np.sum(logprobs) / Z["m"])
+
+    def derivative(self, dA, Z):
+        return np.divide(Z, dA) - np.divide(1 - Z, 1 - dA)

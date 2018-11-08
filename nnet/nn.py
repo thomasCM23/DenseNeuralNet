@@ -10,14 +10,16 @@ import warnings
 
 class Net:
 
-    def __init__(self, regularizationType=L2Regularization(lamda=0), optimizer=GradientDescent(learning_rate=0.01),
-                 cost_function=CrossEntropyLoss):
-        self.regularization = regularizationType
+    def __init__(self, regularization=L2Regularization(lamda=0), optimizer=GradientDescent(learning_rate=0.01),
+                 cost_function=CrossEntropyLoss()):
+        self.regularization = regularization
         self.layers = {}
         self.optimizer = optimizer
         self.cost_function = cost_function
+        self.L = 0
+        self.m = 0
 
-    def dense(self, perviousLayer, numOfUnits=1, initilization="he", activation=Sigmoid, keep_prob=1.0):
+    def dense(self, perviousLayer, numOfUnits=1, initilization="he", activation=Sigmoid(), keep_prob=1.0):
         name = len(self.layers)
         if(name == 0):
             warnings.warn("No input layer found in neural net!")
@@ -26,13 +28,12 @@ class Net:
         self.layers[name] = Hidden(numUnitsPrevLayer, numOfUnits, initilization, activation, name, keep_prob)
         return self.layers[name]
 
-    def input_placeholder(self, shape=(1, None), name="0"):
-        self.layers[name] = Input(shape=shape, name=name)
-        return self.layers[name]
+    def input_placeholder(self, shape=(1, None)):
+        self.layers[0] = Input(shape=shape, name=0)
+        return self.layers[0]
 
     def _forward_prop(self):
-        L = len(self.layers)
-        for l in range(1, L):
+        for l in range(1, self.L):
             A_prev = self.layers[l-1].A
             self.layers[l].Z = np.dot(self.layers[l].W, A_prev) + self.layers[l].b
             self.layers[l].A = self.layers[l].activation.function(self.layers[l].Z)
@@ -44,24 +45,46 @@ class Net:
                 self.layers[l].A = self.layers[l].A * self.layers[l].D
                 self.layers[l].A = self.layers[l].A / self.layers[l].keep_prob
 
-    def _compute_cost(self):
-        pass
-
-    def _backward_prop(self):
-
+    def _backward_prop(self, AL, Y):
         # cost derivative
-
-        #####
-        L = len(self.layers)
-        m = self.layers["A0"].shape[1]
-        for l in reversed(range(L-1)):
-            self.layers[l].dZ = np.multiply(self.layers[l].A, self.layers[l].activation.derivative(self.layers[l].Z))
-            self.layers[l].dW = (1/m) * np.dot(self.layers[l].dZ, self.layers[l-1].A.T)
-            self.layers[l].db = (1/m) * np.sum(self.layers[l].dZ, axis=1, keepdims=True)
+        self.layers[self.L - 1].dA = - self.cost_function.derivative(AL, Y)
+        # doing back prop fro each layer
+        for l in reversed(range(self.L)):
+            self.layers[l].dZ = np.multiply(self.layers[l].dA,
+                                            self.layers[l].activation.derivative(self.layers[l].A,
+                                                                                 self.layers[l].Z))
+            self.layers[l].dW = (1/self.m) * np.dot(self.layers[l].dZ, self.layers[l-1].A.T)
+            self.layers[l].db = (1/self.m) * np.sum(self.layers[l].dZ, axis=1, keepdims=True)
+            if (l == 0): break
             self.layers[l - 1].dA = np.dot(self.layers[l].W.T, self.layers[l].dZ)
 
             # If layer is dropout do the calculationss
             if (np.isclose(self.layers[l].keep_prob, 1.0, atol=1e-08, equal_nan=False)):
                 self.layers[l - 1].dA = self.layers[l - 1].dA * self.layers[l - 1].D
                 self.layers[l - 1].dA = self.layers[l - 1].dA / self.layers[l - 1].keep_prob
+
+    def _compute_cost(self, AL, Y):
+        cost = self.cost_function.function(Z={"Y":Y, "AL":AL}) + self.regularization.regularizer_cost(
+            layers=self.layers, num_instances=self.m)
+        cost = np.squeeze(cost)
+        return cost
+
+    def train(self, X, Y):
+        self.layers[0].A = X
+        self.m = X.shape[1]
+        self.L = len(self.layers)
+
+        self._forward_prop()
+
+        cost = self._compute_cost(self.layers[self.L], Y)
+
+        self._backward_prop(self.layers[self.L], Y)
+
+        return self.layers, cost
+
+
+
+
+
+
 

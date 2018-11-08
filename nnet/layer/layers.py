@@ -8,7 +8,7 @@ class Layer(metaclass=ABCMeta):
 
 class Hidden(Layer):
 
-    def __init__(self, numUnitsPrevLayer, numUnits, initilization="he", activation=Sigmoid, name=None, keep_prob=1.0):
+    def __init__(self, numUnitsPrevLayer, numUnits, initilization="he", activation=Sigmoid(), name=None, keep_prob=1.0):
 
         if(initilization == "he"):
             initVal = np.sqrt(2/numUnitsPrevLayer)
@@ -37,3 +37,6 @@ class Input(Layer):
         self.name = name
         self.Z, self.A = None, None
         self.dW, self.db, self.dZ, self.dA = None, None, None, None
+
+    def set_A(self, X):
+        self.A = X
