@@ -15,7 +15,7 @@ class Hidden(Layer):
         elif(initilization == "xavier"):
             initVal = np.sqrt(1/numUnitsPrevLayer)
         else:
-            initVal = 0.1
+            initVal = 0.1 # reduce standard normal
 
         self.shape = (numUnits, numUnitsPrevLayer)
         self.W = np.random.randn(numUnits, numUnitsPrevLayer) * initVal
