@@ -8,7 +8,7 @@ class Layer(metaclass=ABCMeta):
 
 class Hidden(Layer):
 
-    def __init__(self, numUnitsPrevLayer, numUnits, initilization="he", activation=Sigmoid, name=None):
+    def __init__(self, numUnitsPrevLayer, numUnits, initilization="he", activation=Sigmoid, name=None, keep_prob=1.0):
 
         if(initilization == "he"):
             initVal = np.sqrt(2/numUnitsPrevLayer)
@@ -18,11 +18,13 @@ class Hidden(Layer):
             initVal = 0.1 # reduce standard normal
 
         self.shape = (numUnits, numUnitsPrevLayer)
+        self.keep_prob = keep_prob
         self.W = np.random.randn(numUnits, numUnitsPrevLayer) * initVal
         self.b = np.zeros(shape=(numUnits, 1))
         self.activation = activation
         self.name = name
         self.Z, self.A = None, None
+        self.D = None
         self.dW, self.db, self.dZ, self.dA = None, None, None, None
         self.vdW, self.vdb = np.zeros(shape=self.W.shape), np.zeros(shape=self.b.shape)
         self.sdW, self.sdb = np.zeros(shape=self.W.shape), np.zeros(shape=self.b.shape)
