@@ -24,7 +24,7 @@ class L2Regularization(Regularizer):
         L = len(layers)
 
         for l in range(1, L):
-            reg_val += np.sum(np.square(layers[l]))
+            reg_val += np.sum(np.square(layers[l].W))
 
         return (self.lamda / (2 * num_instances)) * reg_val
 
@@ -41,7 +41,7 @@ class L1Regularization(Regularizer):
         L = len(layers)
 
         for l in range(1, L):
-            reg_val += np.sum(layers[l])
+            reg_val += np.sum(layers[l].W)
 
         return (self.lamda / (2 * num_instances)) * reg_val
 
