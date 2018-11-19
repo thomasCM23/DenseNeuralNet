@@ -1,4 +1,5 @@
 from nnet.math import Sigmoid
+from nnet.math import Linear
 import numpy as np
 from abc import ABCMeta, abstractmethod
 
@@ -19,6 +20,7 @@ class Hidden(Layer):
 
         self.shape = (numUnits, numUnitsPrevLayer)
         self.keep_prob = keep_prob
+        self.is_drop_out = self.keep_prob < 1.0
         self.W = np.random.randn(numUnits, numUnitsPrevLayer) * initVal
         self.b = np.zeros(shape=(numUnits, 1))
         self.activation = activation
@@ -37,6 +39,8 @@ class Input(Layer):
         self.name = name
         self.Z, self.A = None, None
         self.dW, self.db, self.dZ, self.dA = None, None, None, None
+        self.is_drop_out = False
+        self.activation = Linear()
 
     def set_A(self, X):
         self.A = X
