@@ -6,7 +6,7 @@ class Sigmoid(ActivationFunc):
     def function(self, Z):
         return 1 / ( 1 + np.exp(-Z))
 
-    def derivative(self, A, Z):
+    def derivative(self, A, Z, m):
         s = self.function(Z)
         return A * s * (1 - s)
 
@@ -16,7 +16,7 @@ class Tanh(ActivationFunc):
     def function(self, Z):
         return np.tanh(Z)
 
-    def derivative(self, A, Z):
+    def derivative(self, A, Z, m):
         return A * (1 - np.power(self.function(Z), 2))
 
 
@@ -25,7 +25,7 @@ class Relu(ActivationFunc):
     def function(self, Z):
         return np.maximum(0, Z)
 
-    def derivative(self, A, Z):
+    def derivative(self, A, Z, m):
         dZ = np.array(A, copy=True)
         dZ[Z < 0 ] = 0
         dZ[Z >= 0] = 1
@@ -40,7 +40,7 @@ class LeakyRelu(ActivationFunc):
     def function(self, Z):
         return np.maximum(self.leaks * Z, Z)
 
-    def derivative(self, A, Z):
+    def derivative(self, A, Z, m):
         dZ = np.array(A, copy=True)
         dZ[Z < 0] = self.leaks
         dZ[Z >= 0] = 1
@@ -57,7 +57,7 @@ class Elu(ActivationFunc):
         Z[Z >= 0] = Z
         return Z
 
-    def derivative(self, A, Z):
+    def derivative(self, A, Z, m):
         dZ = np.array(A, copy=True)
         dZ[Z < 0] = self.leaks * np.exp(Z)
         dZ[Z >= 0] = 1
@@ -69,5 +69,5 @@ class Linear(ActivationFunc):
     def function(self, Z):
         return Z
 
-    def derivative(self, A, Z):
+    def derivative(self, A, Z, m):
         return A

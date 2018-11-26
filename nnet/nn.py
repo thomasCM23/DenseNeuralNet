@@ -47,13 +47,12 @@ class Net:
 
     def _backward_prop(self, AL, Y):
         # cost derivative
-        self.layers[self.L-1].dA = - self.cost_function.derivative(AL, Y)
+        self.layers[self.L-1].dA = - self.cost_function.derivative(AL, Y, 0)
         # doing back prop fro each layer
         for l in reversed(range(self.L)):
             if(l == 0): break
             self.layers[l].dZ = np.multiply(self.layers[l].dA,
-                                            self.layers[l].activation.derivative(self.layers[l].A,
-                                                                                 self.layers[l].Z))
+                                            self.layers[l].activation.derivative(self.layers[l].A, self.layers[l].Z, 0))
             self.layers[l].dW = (1/self.m) * np.dot(self.layers[l].dZ, self.layers[l-1].A.T)
             self.layers[l].db = (1/self.m) * np.sum(self.layers[l].dZ, axis=1, keepdims=True)
             if (l == 0): break
