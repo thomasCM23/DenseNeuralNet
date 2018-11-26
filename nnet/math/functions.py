@@ -7,5 +7,5 @@ class ActivationFunc(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def derivative(self, A, Z):
+    def derivative(self, A, Z, m):
         pass
