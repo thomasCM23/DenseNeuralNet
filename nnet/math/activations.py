@@ -41,9 +41,11 @@ class LeakyRelu(ActivationFunc):
         return np.maximum(self.leaks * Z, Z)
 
     def derivative(self, A, Z, m):
-        dZ = np.array(A, copy=True)
-        dZ[Z < 0] = self.leaks
-        dZ[Z >= 0] = 1
+        less_than_zero = (Z < 0).astype(np.int)
+        greater_than_zero = (Z >= 0).astype(np.int)
+
+        dZ_temp = np.multiply(less_than_zero,self.leaks)
+        dZ = np.add(dZ_temp, greater_than_zero)
         return dZ
 
 
@@ -53,14 +55,19 @@ class Elu(ActivationFunc):
         self.leaks = leaks
 
     def function(self, Z):
-        Z[Z < 0] = self.leaks * (np.exp(Z) - 1)
-        Z[Z >= 0] = Z
+        less_than_zero = (Z < 0).astype(np.int)
+        greater_than_zero = (Z >= 0).astype(np.int)
+
+        Z_temp = np.multiply(less_than_zero, self.leaks * (np.exp(Z) - 1))
+        Z = np.add(Z_temp, greater_than_zero * Z)
         return Z
 
     def derivative(self, A, Z, m):
-        dZ = np.array(A, copy=True)
-        dZ[Z < 0] = self.leaks * np.exp(Z)
-        dZ[Z >= 0] = 1
+        less_than_zero = (Z < 0).astype(np.int)
+        greater_than_zero = (Z >= 0).astype(np.int)
+
+        dZ_temp = np.multiply(less_than_zero, self.leaks * np.exp(Z))
+        dZ = np.add(dZ_temp, greater_than_zero)
         return dZ
 
 

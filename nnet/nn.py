@@ -77,4 +77,10 @@ class Net:
         self._forward_prop()
         cost = self._compute_cost(self.layers[self.L - 1].A, Y)
         self._backward_prop(self.layers[self.L - 1].A, Y)
+        self.optimizer.update_parameters(self.layers)
         return self.layers, cost
+
+    def predict(self, X):
+        self.layers[0].A = X
+        self._forward_prop()
+        return (self.layers[self.L - 1].A).T
