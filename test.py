@@ -28,7 +28,7 @@ def plot_predition(X, y, y_pred, axes):
 
 
 
-X, y = make_moons(n_samples=1000, noise=0.3, random_state=42)
+X, y = make_moons(n_samples=2000, noise=0.1, random_state=42)
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
 # scatter plot, dots colored by class value
 plot_dataset(X, y, [-1.5, 2.5, -1, 1.5])
@@ -43,18 +43,18 @@ newNet = nnet.Net(regularization=regulizer, optimizer=optimizer, cost_function=l
 
 input = newNet.input_placeholder(shape=(2, None))
 # Just showing all activations
-hidden1 = newNet.dense(input, numOfUnits=15, activation=nnet.Elu())
-hidden2 = newNet.dense(hidden1, numOfUnits=10, activation=nnet.LeakyRelu())
-hidden3 = newNet.dense(hidden2, numOfUnits=8, activation=nnet.Relu())
-hidden4 = newNet.dense(hidden3, numOfUnits=5, activation=nnet.Tanh())
+hidden1 = newNet.dense(input, numOfUnits=15, activation=nnet.Relu())
+hidden2 = newNet.dense(hidden1, numOfUnits=10, activation=nnet.Relu())
+hidden3 = newNet.dense(hidden2, numOfUnits=6, activation=nnet.Relu())
+hidden4 = newNet.dense(hidden3, numOfUnits=2, activation=nnet.Relu())
 output = newNet.dense(hidden4, numOfUnits=1, activation=nnet.Sigmoid())
 
-num_epochs = 500
+num_epochs = 100
 
 costs = []
 
 for epoch in range(1, num_epochs):
-    _, loss = newNet.train(np.array(X_train).T, np.array(y_train).T)
+    _, loss = newNet.train(np.array(X_train).T, np.array(y_train).T, _check_gradients=True)
     costs.append(loss)
     if( epoch % 50 == 0):
         print("------ Epoch: ", epoch, " ------")

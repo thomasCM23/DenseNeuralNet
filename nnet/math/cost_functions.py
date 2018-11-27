@@ -12,7 +12,7 @@ class CrossEntropyLoss(ActivationFunc):
         return -(np.sum(logprobs) / Z["m"])
 
     def derivative(self, AL, Y, m):
-        return np.divide(Y, AL) - np.divide(1 - Y, 1 - AL)
+        return -(np.divide(Y, AL) - np.divide(1 - Y, 1 - AL))
 
 
 class SoftmaxCrossEntropyLoss(ActivationFunc):
@@ -25,7 +25,7 @@ class SoftmaxCrossEntropyLoss(ActivationFunc):
         return -(np.sum(logprobs))
 
     def derivative(self, AL, Y, m):
-        return AL - Y
+        return -(AL - Y)
 
 
 class MeanSquaredError(ActivationFunc):

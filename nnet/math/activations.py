@@ -26,9 +26,10 @@ class Relu(ActivationFunc):
         return np.maximum(0, Z)
 
     def derivative(self, A, Z, m):
-        dZ = np.array(A, copy=True)
-        dZ[Z < 0 ] = 0
-        dZ[Z >= 0] = 1
+        less_than_zero = (Z < 0).astype(np.int)
+        greater_than_zero = (Z >= 0).astype(np.int)
+        dZ_temp = np.multiply(less_than_zero, 0)
+        dZ = np.add(dZ_temp, greater_than_zero)
         return dZ
 
 

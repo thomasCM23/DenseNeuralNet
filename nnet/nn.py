@@ -47,7 +47,7 @@ class Net:
 
     def _backward_prop(self, AL, Y):
         # cost derivative
-        self.layers[self.L-1].dA = - self.cost_function.derivative(AL, Y, 0)
+        self.layers[self.L-1].dA = self.cost_function.derivative(AL, Y, self.m)
         # doing back prop fro each layer
         for l in reversed(range(self.L)):
             if(l == 0): break
@@ -69,14 +69,17 @@ class Net:
         cost = np.squeeze(cost)
         return cost
 
-    def train(self, X, Y):
-
+    def train(self, X, Y, _check_gradients = False):
         self.layers[0].A = X
         self.m = X.shape[1]
         self.L = len(self.layers)
         self._forward_prop()
         cost = self._compute_cost(self.layers[self.L - 1].A, Y)
         self._backward_prop(self.layers[self.L - 1].A, Y)
+
+        if(_check_gradients):
+            self._gradient_checking()
+
         self.optimizer.update_parameters(self.layers)
         return self.layers, cost
 
@@ -84,3 +87,49 @@ class Net:
         self.layers[0].A = X
         self._forward_prop(is_prediction=True)
         return (self.layers[self.L - 1].A).T
+
+    def _gradient_checking(self, epsilon = 1e-7):
+        for l in range(1, self.L):
+            theta = self.layers[l].W + self.layers[l].b
+            # Approximate the gradients
+            J_plus = self.layers[l].activation.function(theta + epsilon)
+            J_minus = self.layers[l].activation.function(theta - epsilon)
+            gradapprox = (J_plus - J_minus) / (2 * epsilon)
+            # Calculate gradient
+            gradient = self.layers[l].activation.derivative(1, theta, 0)
+            # Calculate difference
+            numerator = np.linalg.norm(gradient - gradapprox)  # Step 1'
+            denominator = np.linalg.norm(gradient) + np.linalg.norm(gradapprox)  # Step 2'
+            difference = numerator / denominator
+
+            if difference < 1e-7:
+                print("****************** The gradient is correct! ******************",
+                      self.layers[l].activation.__class__.__name__
+                      )
+            else:
+                print("xxxxxxxxxxxxxxxxxx The gradient is wrong! xxxxxxxxxxxxxxxxxx",
+                      self.layers[l].activation.__class__.__name__
+                      )
+                print("Layer: ", l)
+                print("Gradient Approximated: ", gradapprox)
+                print("Calculated Grad: ", gradient)
+
+        # Checking the gradient of cost function
+        thetaL = self.layers[self.L - 1].A
+        J_plus = self.cost_function.function(Z={"Y": 1, "AL": thetaL + epsilon, "m": self.m})
+        J_minus = self.cost_function.function(Z={"Y": 1, "AL": thetaL - epsilon, "m": self.m})
+        gradapprox = (J_plus - J_minus) / (2 * epsilon)
+        gradient = np.sum(self.cost_function.derivative(thetaL, 1, self.m)) / self.m
+        numerator = np.linalg.norm(gradient - gradapprox)  # Step 1'
+        denominator = np.linalg.norm(gradient) + np.linalg.norm(gradapprox)  # Step 2'
+        difference = numerator / denominator
+        if difference < 1e-7:
+            print("****************** The gradient is correct! Cost function ******************",
+                   self.cost_function.__class__.__name__
+                   )
+        else:
+            print("xxxxxxxxxxxxxxxxxx The gradient is wrong! Cost function xxxxxxxxxxxxxxxxxx",
+                  self.cost_function.__class__.__name__
+                  )
+            print("Gradient Approximated: ", gradapprox)
+            print("Calculated Grad: ", gradient)
