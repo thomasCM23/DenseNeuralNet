@@ -32,14 +32,14 @@ class Net:
         self.layers[0] = Input(shape=shape, name=0)
         return self.layers[0]
 
-    def _forward_prop(self):
+    def _forward_prop(self, is_prediction = False):
         for l in range(1, self.L):
             A_prev = self.layers[l-1].A
             self.layers[l].Z = np.dot(self.layers[l].W, A_prev) + self.layers[l].b
             self.layers[l].A = self.layers[l].activation.function(self.layers[l].Z)
 
             # If layer is dropout do the calculations
-            if(self.layers[l].is_drop_out):
+            if(self.layers[l].is_drop_out and (not is_prediction)):
                 self.layers[l].D = np.random.rand(self.layers[l].A.shape[0], self.layers[l].A.shape[1])
                 self.layers[l].D = self.layers[l].D < self.layers[l].keep_prob
                 self.layers[l].A = self.layers[l].A * self.layers[l].D
@@ -82,5 +82,5 @@ class Net:
 
     def predict(self, X):
         self.layers[0].A = X
-        self._forward_prop()
+        self._forward_prop(is_prediction=True)
         return (self.layers[self.L - 1].A).T

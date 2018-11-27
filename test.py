@@ -1,30 +1,26 @@
 import nnet
-from nnet.optimizer import Momentum, Adam, RMSProp, GradientDescent
-from nnet.regularization import L2Regularization
-from nnet.math.cost_functions import MeanSquaredError, CrossEntropyLoss
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.datasets import make_moons
-import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import f1_score
 
 
 def plot_dataset(X, y, axes):
-    plt.figure(0)
-    plt.plot(X[:, 0][y==0], X[:, 1][y==0], "bs")
-    plt.plot(X[:, 0][y==1], X[:, 1][y==1], "g^")
+    plt.figure("Make Moon Data")
+    plt.plot(X[:, 0][y==0], X[:, 1][y==0], "rs")
+    plt.plot(X[:, 0][y==1], X[:, 1][y==1], "bo")
     plt.axis(axes)
     plt.grid(True, which='both')
     plt.xlabel(r"$x_1$", fontsize=20)
     plt.ylabel(r"$x_2$", fontsize=20, rotation=0)
 
 def plot_predition(X, y, y_pred, axes):
-    plt.figure(1)
-    plt.plot(X[:, 0][y==0], X[:, 1][y==0], "bs")
-    plt.plot(X[:, 0][y==1], X[:, 1][y==1], "g^")
-    plt.plot(X[:, 0][y_pred == 0], X[:, 1][y_pred == 0], "cx")
-    plt.plot(X[:, 0][y_pred == 1], X[:, 1][y_pred == 1], "yv")
+    plt.figure("Predicted Results vs Real")
+    plt.plot(X[:, 0][y==0], X[:, 1][y==0], "rs")
+    plt.plot(X[:, 0][y==1], X[:, 1][y==1], "bo")
+    plt.plot(X[:, 0][y_pred == 0], X[:, 1][y_pred == 0], "mx")
+    plt.plot(X[:, 0][y_pred == 1], X[:, 1][y_pred == 1], "c+")
     plt.axis(axes)
     plt.grid(True, which='both')
     plt.xlabel(r"$x_1$", fontsize=20)
@@ -32,16 +28,16 @@ def plot_predition(X, y, y_pred, axes):
 
 
 
-X, y = make_moons(n_samples=1000, noise=0.15, random_state=42)
+X, y = make_moons(n_samples=1000, noise=0.3, random_state=42)
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
 # scatter plot, dots colored by class value
 plot_dataset(X, y, [-1.5, 2.5, -1, 1.5])
 
 
 
-optimizer = Adam(learning_rate=0.001)
-regulizer = L2Regularization(lamda=0.5)
-loss_func = CrossEntropyLoss()
+optimizer = nnet.Adam(learning_rate=0.001)
+regulizer = nnet.L2Regularization(lamda=0.5)
+loss_func = nnet.CrossEntropyLoss()
 
 newNet = nnet.Net(regularization=regulizer, optimizer=optimizer, cost_function=loss_func)
 
