@@ -45,15 +45,18 @@ class Net:
                 self.layers[l].A = self.layers[l].A * self.layers[l].D
                 self.layers[l].A = self.layers[l].A / self.layers[l].keep_prob
 
+
     def _backward_prop(self, AL, Y):
         # cost derivative
         self.layers[self.L-1].dA = self.cost_function.derivative(AL, Y, self.m)
         # doing back prop fro each layer
         for l in reversed(range(self.L)):
             if(l == 0): break
+
             self.layers[l].dZ = np.multiply(self.layers[l].dA,
-                                            self.layers[l].activation.derivative(self.layers[l].A, self.layers[l].Z, 0))
-            self.layers[l].dW = (1/self.m) * np.dot(self.layers[l].dZ, self.layers[l-1].A.T)
+                                            self.layers[l].activation.derivative(1, self.layers[l].Z, 0))
+            self.layers[l].dW = (1/self.m) * np.dot(self.layers[l].dZ, self.layers[l-1].A.T) + \
+                                self.regularization.regularizer_cost(layers=self.layers, num_instances=self.m)
             self.layers[l].db = (1/self.m) * np.sum(self.layers[l].dZ, axis=1, keepdims=True)
             if (l == 0): break
             self.layers[l - 1].dA = np.dot(self.layers[l].W.T, self.layers[l].dZ)
@@ -64,8 +67,7 @@ class Net:
                 self.layers[l - 1].dA = self.layers[l - 1].dA / self.layers[l - 1].keep_prob
 
     def _compute_cost(self, AL, Y):
-        cost = self.cost_function.function(Z={"Y":Y, "AL":AL, "m":self.m}) + self.regularization.regularizer_cost(
-            layers=self.layers, num_instances=self.m)
+        cost = self.cost_function.function(Z={"Y":Y, "AL":AL, "m":self.m})
         cost = np.squeeze(cost)
         return cost
 
@@ -80,13 +82,13 @@ class Net:
         if(_check_gradients):
             self._gradient_checking()
 
-        self.optimizer.update_parameters(self.layers)
+        self.layers = self.optimizer.update_parameters(self.layers)
         return self.layers, cost
 
     def predict(self, X):
         self.layers[0].A = X
         self._forward_prop(is_prediction=True)
-        return (self.layers[self.L - 1].A).T
+        return (self.layers[self.L - 1].A)
 
     def _gradient_checking(self, epsilon = 1e-7):
         for l in range(1, self.L):

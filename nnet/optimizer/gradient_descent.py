@@ -11,3 +11,4 @@ class GradientDescent(OptimizationAlgo):
         for l in range(1, L):
             layers[l].W = layers[l].W - (self.learning_rate * layers[l].dW)
             layers[l].b = layers[l].b - (self.learning_rate * layers[l].db)
+        return layers

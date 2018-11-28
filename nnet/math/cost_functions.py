@@ -8,11 +8,10 @@ class CrossEntropyLoss(ActivationFunc):
         pass
 
     def function(self, Z):
-        logprobs = np.multiply(np.log(Z["AL"]), Z["Y"]) + np.multiply((1 - Z["Y"]), np.log(1 - Z["AL"]))
-        return -(np.sum(logprobs) / Z["m"])
+        return (-np.dot(Z["Y"], np.log(Z["AL"]).T) - np.dot(1 - Z["Y"], np.log(1 - Z["AL"]).T)) / Z['m']
 
     def derivative(self, AL, Y, m):
-        return -(np.divide(Y, AL) - np.divide(1 - Y, 1 - AL))
+        return - (np.divide(Y, AL) - np.divide(1 - Y, 1 - AL))
 
 
 class SoftmaxCrossEntropyLoss(ActivationFunc):

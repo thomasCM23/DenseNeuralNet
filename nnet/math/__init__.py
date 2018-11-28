@@ -6,3 +6,4 @@ from nnet.math.activations import Relu
 from nnet.math.activations import LeakyRelu
 from nnet.math.activations import Elu
 from nnet.math.cost_functions import CrossEntropyLoss
+from nnet.math.cost_functions import SoftmaxCrossEntropyLoss

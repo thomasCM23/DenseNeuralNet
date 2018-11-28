@@ -11,3 +11,4 @@ from nnet.math import LeakyRelu
 from nnet.math import Elu
 from nnet.math import Tanh
 from nnet.math import CrossEntropyLoss
+from nnet.math import SoftmaxCrossEntropyLoss

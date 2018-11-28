@@ -29,3 +29,4 @@ class Adam(OptimizationAlgo):
 
             layers[l].W = layers[l].W - (self.learning_rate * (vdW_corrected / (np.sqrt(sdW_corrected) + self.epsilon)))
             layers[l].b = layers[l].b - (self.learning_rate * (vdb_corrected / (np.sqrt(sdb_corrected) + self.epsilon)))
+        return layers

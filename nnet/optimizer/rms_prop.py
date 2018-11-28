@@ -16,3 +16,4 @@ class RMSProp(OptimizationAlgo):
             layers[l].sdb = self.beta * layers[l].sdb + (1 - self.beta) * (np.power(layers[l].db,2))
             layers[l].W = layers[l].W - (self.learning_rate * (layers[l].dW / (np.sqrt(layers[l].sdW) + self.epsilon)))
             layers[l].b = layers[l].b - (self.learning_rate * (layers[l].db / (np.sqrt(layers[l].sdb) + self.epsilon)))
+        return layers

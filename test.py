@@ -1,80 +1,100 @@
 import nnet
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.datasets import make_moons
+from sklearn.datasets import fetch_mldata
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import f1_score
+from sklearn.metrics import f1_score, precision_score, recall_score
+
+def predictionReshape(probas, m):
+    p = np.zeros((1,m))
+    less_than_half = (probas[0,:] <= 0.5).astype(np.int)
+    greater_than_half = (probas[0,:] > .5).astype(np.int)
+    p_temp = np.multiply(less_than_half, 0)
+    p[0] = np.add(p_temp, greater_than_half)
+    return p
 
 
-def plot_dataset(X, y, axes):
-    plt.figure("Make Moon Data")
-    plt.plot(X[:, 0][y==0], X[:, 1][y==0], "rs")
-    plt.plot(X[:, 0][y==1], X[:, 1][y==1], "bo")
-    plt.axis(axes)
-    plt.grid(True, which='both')
-    plt.xlabel(r"$x_1$", fontsize=20)
-    plt.ylabel(r"$x_2$", fontsize=20, rotation=0)
+digits = fetch_mldata("MNIST original")
 
-def plot_predition(X, y, y_pred, axes):
-    plt.figure("Predicted Results vs Real")
-    plt.plot(X[:, 0][y==0], X[:, 1][y==0], "rs")
-    plt.plot(X[:, 0][y==1], X[:, 1][y==1], "bo")
-    plt.plot(X[:, 0][y_pred == 0], X[:, 1][y_pred == 0], "mx")
-    plt.plot(X[:, 0][y_pred == 1], X[:, 1][y_pred == 1], "c+")
-    plt.axis(axes)
-    plt.grid(True, which='both')
-    plt.xlabel(r"$x_1$", fontsize=20)
-    plt.ylabel(r"$x_2$", fontsize=20, rotation=0)
+X, y = digits["data"],digits["target"]
+print(np.unique(y))
+y_5 = (y == 5).astype(np.float32)
+print(np.unique(y_5))
+X_train, X_test, y_train, y_test = train_test_split(X, y_5, test_size=0.30, random_state=42, stratify=y_5)
 
+X_train = X_train.T
+X_train = X_train/ 255
+X_test = X_test.T
+X_test = X_test/ 255
+y_train = np.reshape(y_train, (1, y_train.shape[0]))
+y_test = np.reshape(y_test, (1, y_test.shape[0]))
+print(y_train.shape)
+print(X_train.shape)
+print(X_test.shape)
 
+is_five = X_test[:, y_test[0,:] == 1][:, 0:5]
+is_not_five = X_test[:, y_test[0,:] != 1][:, 0:5]
+plt.figure("FIVE")
+#plt.imshow(is_five.reshape(28,28))
+plt.figure("NOT FIVE")
+#plt.imshow(is_not_five.reshape(28,28))
+is_five = np.reshape(is_five, (is_five.shape[0], 5))
+is_not_five = np.reshape(is_not_five, (is_not_five.shape[0], 5))
 
-X, y = make_moons(n_samples=2000, noise=0.1, random_state=42)
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
-# scatter plot, dots colored by class value
-plot_dataset(X, y, [-1.5, 2.5, -1, 1.5])
-
-
-
-optimizer = nnet.Adam(learning_rate=0.001)
-regulizer = nnet.L2Regularization(lamda=0.5)
+optimizer = nnet.Momentum(learning_rate=1)
+regulizer = nnet.L2Regularization(lamda=0.0001)
 loss_func = nnet.CrossEntropyLoss()
 
 newNet = nnet.Net(regularization=regulizer, optimizer=optimizer, cost_function=loss_func)
 
-input = newNet.input_placeholder(shape=(2, None))
+input = newNet.input_placeholder(shape=(784, None))
 # Just showing all activations
-hidden1 = newNet.dense(input, numOfUnits=15, activation=nnet.Relu())
-hidden2 = newNet.dense(hidden1, numOfUnits=10, activation=nnet.Relu())
-hidden3 = newNet.dense(hidden2, numOfUnits=6, activation=nnet.Relu())
-hidden4 = newNet.dense(hidden3, numOfUnits=2, activation=nnet.Relu())
+hidden1 = newNet.dense(input, numOfUnits=50, activation=nnet.Relu())
+hidden2 = newNet.dense(hidden1, numOfUnits=30, activation=nnet.Relu())
+hidden3 = newNet.dense(hidden2, numOfUnits=10, activation=nnet.Relu())
+hidden4 = newNet.dense(hidden3, numOfUnits=4, activation=nnet.Relu())
 output = newNet.dense(hidden4, numOfUnits=1, activation=nnet.Sigmoid())
 
-num_epochs = 100
+num_epochs = 5000
 
 costs = []
 
-for epoch in range(1, num_epochs):
-    _, loss = newNet.train(np.array(X_train).T, np.array(y_train).T, _check_gradients=True)
+for epoch in range(num_epochs):
+    _, loss = newNet.train(X_train, y_train)
     costs.append(loss)
-    if( epoch % 50 == 0):
+    if( epoch % 5 == 0):
+        pred_y_V = newNet.predict(is_five)
+        print(pred_y_V)
+        pred_y_V = predictionReshape(pred_y_V, 5)
+        print(pred_y_V)
+        print("---------------")
+        pred_y_V2 = newNet.predict(is_not_five)
+        print(pred_y_V2)
+        pred_y_V2 = predictionReshape(pred_y_V2, 5)
+        print(pred_y_V2)
         print("------ Epoch: ", epoch, " ------")
         print("Corss entropy Loss: ", loss)
         print("----------------------------")
 
 
-pred_y = newNet.predict(np.array(X_test).T)
-pred_y = np.reshape(pred_y, (pred_y.shape[0],))
 
-# If Prediction is over .5 then class 1
-pred_y[pred_y >= .5] = 1
-pred_y[pred_y < .5] = 0
+pred_y = newNet.predict(X_test)
+print(pred_y.shape)
+pred_y = predictionReshape(pred_y, X_test.shape[1])
+print(y_test.shape)
+print("Shape Of Predictions: \t", pred_y.shape)
+incorrect_X = np.not_equal(pred_y, y_test)
+unique, counts = np.unique(incorrect_X, return_counts=True)
+print("Predictions: \t", dict(zip(unique, counts)))
+print("Precision score: \t", precision_score(y_test[0,:], pred_y[0,:]))
+print("Recall score: \t", recall_score(y_test[0,:], pred_y[0,:]))
+print("F1 score: \t", f1_score(y_test[0,:], pred_y[0,:]))
 
-print("Incorrect Predictions: ", X_test[:, :][y_test != pred_y])
-
-plot_predition(X_test, y_test, pred_y, [-1.5, 2.5, -1, 1.5])
-
-print("F1 score: ", f1_score(y_test, pred_y))
-
+# for i in range(incorrect_X.shape[0]):
+#     if(i % 100 == 0):
+#         d =0
+#         #plt.figure(i)
+#         #plt.imshow(incorrect_X[i].reshape(28,28))
 
 # make an agg figure
 fig, ax = plt.subplots()
@@ -86,3 +106,4 @@ X = np.array(fig.canvas.renderer._renderer)
 
 # now display the array X as an Axes in a new figure
 plt.show()
+

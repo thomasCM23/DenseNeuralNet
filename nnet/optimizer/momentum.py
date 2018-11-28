@@ -14,3 +14,4 @@ class Momentum(OptimizationAlgo):
             layers[l].vdb = self.beta * layers[l].vdb + (1 - self.beta) * layers[l].db
             layers[l].W = layers[l].W - (self.learning_rate * layers[l].vdW)
             layers[l].b = layers[l].b - (self.learning_rate * layers[l].vdb)
+        return layers
