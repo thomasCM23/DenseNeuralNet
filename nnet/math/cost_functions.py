@@ -21,10 +21,10 @@ class SoftmaxCrossEntropyLoss(ActivationFunc):
 
     def function(self, Z):
         logprobs = np.multiply(Z["Y"], np.log(Z["AL"]))
-        return -(np.sum(logprobs))
+        return (-np.sum(logprobs))/ Z['m']
 
     def derivative(self, AL, Y, m):
-        return -(AL - Y)
+        return (AL - Y)
 
 
 class MeanSquaredError(ActivationFunc):

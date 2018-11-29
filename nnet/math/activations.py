@@ -81,3 +81,12 @@ class Linear(ActivationFunc):
 
     def derivative(self, A, Z, m):
         return A
+
+class Softmax(ActivationFunc):
+
+    def function(self, Z):
+        t = np.exp(Z)
+        return t / np.sum(t, axis=0)
+
+    def derivative(self, A, Z, m):
+        return 1

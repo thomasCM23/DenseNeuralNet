@@ -5,90 +5,90 @@ from sklearn.datasets import fetch_mldata
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import f1_score, precision_score, recall_score
 
-def predictionReshape(probas, m):
-    p = np.zeros((1,m))
-    less_than_half = (probas[0,:] <= 0.5).astype(np.int)
-    greater_than_half = (probas[0,:] > .5).astype(np.int)
-    p_temp = np.multiply(less_than_half, 0)
-    p[0] = np.add(p_temp, greater_than_half)
-    return p
 
 
 digits = fetch_mldata("MNIST original")
 
 X, y = digits["data"],digits["target"]
+y = y.astype(np.int)
 print(np.unique(y))
-y_5 = (y == 5).astype(np.float32)
-print(np.unique(y_5))
-X_train, X_test, y_train, y_test = train_test_split(X, y_5, test_size=0.30, random_state=42, stratify=y_5)
+ohm = np.zeros((y.shape[0], 10))
+ohm[np.arange(y.shape[0]), y] = 1
+y = np.reshape(y, (1, y.shape[0]))
+X_train, X_test, y_train, y_test = train_test_split(X, ohm, test_size=0.30, random_state=42, stratify=ohm)
+
 
 X_train = X_train.T
 X_train = X_train/ 255
 X_test = X_test.T
 X_test = X_test/ 255
-y_train = np.reshape(y_train, (1, y_train.shape[0]))
-y_test = np.reshape(y_test, (1, y_test.shape[0]))
+y_train = y_train.T
+y_test = y_test.T
 print(y_train.shape)
 print(X_train.shape)
 print(X_test.shape)
 
-is_five = X_test[:, y_test[0,:] == 1][:, 0:5]
-is_not_five = X_test[:, y_test[0,:] != 1][:, 0:5]
-plt.figure("FIVE")
-#plt.imshow(is_five.reshape(28,28))
-plt.figure("NOT FIVE")
-#plt.imshow(is_not_five.reshape(28,28))
-is_five = np.reshape(is_five, (is_five.shape[0], 5))
-is_not_five = np.reshape(is_not_five, (is_not_five.shape[0], 5))
+is_zeros = X.T[:, y[0,:] == 0][:, 0:2]
+is_threes = X.T[:, y[0,:] == 3][:, 0:2]
+is_fives = X.T[:, y[0,:] == 5][:, 0:2]
+is_eights = X.T[:, y[0,:] == 8][:, 0:2]
 
-optimizer = nnet.Momentum(learning_rate=1)
-regulizer = nnet.L2Regularization(lamda=0.0001)
-loss_func = nnet.CrossEntropyLoss()
+is_zeros = np.reshape(is_zeros, (is_zeros.shape[0], 2))
+is_threes = np.reshape(is_threes, (is_threes.shape[0], 2))
+is_fives = np.reshape(is_fives, (is_fives.shape[0], 2))
+is_eights = np.reshape(is_eights, (is_eights.shape[0], 2))
+
+optimizer = nnet.Momentum(learning_rate=0.05)
+regulizer = nnet.L2Regularization(lamda=0.05)
+loss_func = nnet.SoftmaxCrossEntropyLoss()
 
 newNet = nnet.Net(regularization=regulizer, optimizer=optimizer, cost_function=loss_func)
 
 input = newNet.input_placeholder(shape=(784, None))
 # Just showing all activations
-hidden1 = newNet.dense(input, numOfUnits=50, activation=nnet.Relu())
-hidden2 = newNet.dense(hidden1, numOfUnits=30, activation=nnet.Relu())
-hidden3 = newNet.dense(hidden2, numOfUnits=10, activation=nnet.Relu())
-hidden4 = newNet.dense(hidden3, numOfUnits=4, activation=nnet.Relu())
-output = newNet.dense(hidden4, numOfUnits=1, activation=nnet.Sigmoid())
+hidden1 = newNet.dense(input, numOfUnits=100, activation=nnet.Relu())
+hidden2 = newNet.dense(hidden1, numOfUnits=80, activation=nnet.Relu())
+hidden3 = newNet.dense(hidden2, numOfUnits=50, activation=nnet.Relu())
+hidden4 = newNet.dense(hidden3, numOfUnits=30, activation=nnet.Relu())
+hidden5 = newNet.dense(hidden4, numOfUnits=20, activation=nnet.Relu())
+hidden6 = newNet.dense(hidden5, numOfUnits=10, activation=nnet.Sigmoid())
+output = newNet.dense(hidden6, numOfUnits=10, activation=nnet.Softmax())
 
-num_epochs = 5000
+num_epochs =500
 
 costs = []
 
 for epoch in range(num_epochs):
     _, loss = newNet.train(X_train, y_train)
     costs.append(loss)
-    if( epoch % 5 == 0):
-        pred_y_V = newNet.predict(is_five)
-        print(pred_y_V)
-        pred_y_V = predictionReshape(pred_y_V, 5)
-        print(pred_y_V)
-        print("---------------")
-        pred_y_V2 = newNet.predict(is_not_five)
-        print(pred_y_V2)
-        pred_y_V2 = predictionReshape(pred_y_V2, 5)
-        print(pred_y_V2)
+    if( epoch % 10 == 0):
+        pred_y_zeros = newNet.predict(is_zeros)
+        print("Zeros: ",pred_y_zeros.T, " Predicted Values: ", np.argmax(pred_y_zeros, axis=0))
+        pred_y_threes = newNet.predict(is_threes)
+        print("Threes: ", pred_y_threes.T, " Predicted Values: ", np.argmax(pred_y_threes, axis=0))
+        pred_y_fives = newNet.predict(is_fives)
+        print("Fives: ", pred_y_fives.T, " Predicted Values: ", np.argmax(pred_y_fives, axis=0))
+        pred_y_eights = newNet.predict(is_eights)
+        print("Eights: ", pred_y_eights.T, " Predicted Values: ", np.argmax(pred_y_eights, axis=0))
+
         print("------ Epoch: ", epoch, " ------")
-        print("Corss entropy Loss: ", loss)
+        print("Softmax entropy Loss: ", loss)
         print("----------------------------")
 
 
 
 pred_y = newNet.predict(X_test)
-print(pred_y.shape)
-pred_y = predictionReshape(pred_y, X_test.shape[1])
-print(y_test.shape)
+pred_y = np.argmax(pred_y, axis=0)
+y_test = np.argmax(y_test, axis=0)
+print(pred_y[0:10])
+print(y_test[0:10])
 print("Shape Of Predictions: \t", pred_y.shape)
 incorrect_X = np.not_equal(pred_y, y_test)
 unique, counts = np.unique(incorrect_X, return_counts=True)
 print("Predictions: \t", dict(zip(unique, counts)))
-print("Precision score: \t", precision_score(y_test[0,:], pred_y[0,:]))
-print("Recall score: \t", recall_score(y_test[0,:], pred_y[0,:]))
-print("F1 score: \t", f1_score(y_test[0,:], pred_y[0,:]))
+print("Precision score: \t", precision_score(y_test, pred_y))
+print("Recall score: \t", recall_score(y_test, pred_y))
+print("F1 score: \t", f1_score(y_test, pred_y))
 
 # for i in range(incorrect_X.shape[0]):
 #     if(i % 100 == 0):
