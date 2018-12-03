@@ -15,6 +15,8 @@ class Hidden(Layer):
             initVal = np.sqrt(2/numUnitsPrevLayer)
         elif(initilization == "xavier"):
             initVal = np.sqrt(1/numUnitsPrevLayer)
+        elif (initilization == "mod_he"):
+            initVal = np.sqrt(2 / (numUnitsPrevLayer + numUnits))
         else:
             initVal = 0.1 # reduce standard normal
 

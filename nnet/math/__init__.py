@@ -8,3 +8,4 @@ from nnet.math.activations import Elu
 from nnet.math.activations import Softmax
 from nnet.math.cost_functions import CrossEntropyLoss
 from nnet.math.cost_functions import SoftmaxCrossEntropyLoss
+from nnet.math.cost_functions import MeanSquaredError

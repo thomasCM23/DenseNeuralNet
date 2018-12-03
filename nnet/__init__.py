@@ -14,3 +14,4 @@ from nnet.math import Linear
 from nnet.math import Softmax
 from nnet.math import CrossEntropyLoss
 from nnet.math import SoftmaxCrossEntropyLoss
+from nnet.math import MeanSquaredError

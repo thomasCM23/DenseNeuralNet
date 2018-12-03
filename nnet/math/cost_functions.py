@@ -34,7 +34,7 @@ class MeanSquaredError(ActivationFunc):
 
     def function(self, Z):
         squared_variations = (Z["AL"] - Z["Y"]) ** 2
-        return  np.sum(squared_variations) / (2 * Z["m"])
+        return np.sum(squared_variations) / (2 * Z["m"])
 
     def derivative(self, AL, Y, m):
         variation = AL - Y

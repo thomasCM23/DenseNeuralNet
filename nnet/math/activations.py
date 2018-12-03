@@ -26,29 +26,24 @@ class Relu(ActivationFunc):
         return np.maximum(0, Z)
 
     def derivative(self, A, Z, m):
-        less_than_zero = (Z <= 0).astype(np.int)
-        greater_than_zero = (Z > 0).astype(np.int)
-        dZ_temp = np.multiply(less_than_zero, 0)
-        dZ = np.add(dZ_temp, greater_than_zero)
-        # dZ = np.array(Z, copy=True)
-        # dZ[Z <= 0] = 0
+        dZ = np.copy(Z)
+        dZ[Z <= 0] = 0
+        dZ[Z > 0] = 1
         return dZ
 
 
 class LeakyRelu(ActivationFunc):
 
-    def __init__(self, leaks=0.01):
+    def __init__(self, leaks=0.1):
         self.leaks = leaks
 
     def function(self, Z):
         return np.maximum(self.leaks * Z, Z)
 
     def derivative(self, A, Z, m):
-        less_than_zero = (Z < 0).astype(np.int)
-        greater_than_zero = (Z >= 0).astype(np.int)
-
-        dZ_temp = np.multiply(less_than_zero,self.leaks)
-        dZ = np.add(dZ_temp, greater_than_zero)
+        dZ = np.copy(Z)
+        dZ[Z <= 0] = self.leaks
+        dZ[Z > 0] = 1
         return dZ
 
 
@@ -58,19 +53,15 @@ class Elu(ActivationFunc):
         self.leaks = leaks
 
     def function(self, Z):
-        less_than_zero = (Z < 0).astype(np.int)
-        greater_than_zero = (Z >= 0).astype(np.int)
-
-        Z_temp = np.multiply(less_than_zero, self.leaks * (np.exp(Z) - 1))
-        Z = np.add(Z_temp, greater_than_zero * Z)
-        return Z
+        A = np.copy(Z)
+        A[Z <= 0] = self.leaks * (np.exp(Z) - 1)
+        A[Z > 0] = Z
+        return A
 
     def derivative(self, A, Z, m):
-        less_than_zero = (Z < 0).astype(np.int)
-        greater_than_zero = (Z >= 0).astype(np.int)
-
-        dZ_temp = np.multiply(less_than_zero, self.leaks * np.exp(Z))
-        dZ = np.add(dZ_temp, greater_than_zero)
+        dZ = np.copy(Z)
+        dZ[Z <= 0] = self.leaks * np.exp(Z)
+        dZ[Z > 0] = 1
         return dZ
 
 
@@ -80,7 +71,8 @@ class Linear(ActivationFunc):
         return Z
 
     def derivative(self, A, Z, m):
-        return A
+        return np.ones(Z.shape)
+
 
 class Softmax(ActivationFunc):
 
