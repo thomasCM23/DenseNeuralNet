@@ -1,5 +1,5 @@
 # DenseNeuralNet
-Simple implementation of a Neural Network framework. Only meant for me to reinforce some of the knowledge I have gained about Neural Networks.
+Simple implementation of a Neural Network framework. Only meant for me to reinforce some of the knowledge I have gained about Neural Networks. This framework is specifically for classification, if time allows I will implement regression using MSE.
 
 ### Topic Of Interest
 - Weight initialization of layers(He, Xavier, Reduced Standard Normal)
@@ -46,4 +46,4 @@ Used for Classification, to see examples see 1_Basic_Example.ipynb, and 2_MNIST_
         pred_y = newNet.predict(X)
     ```
     
-**NB: This has been tested, on simple data for classification tasks, which seems to work for binary and multi-class. I did write an MSE loss for regression tasks, but it was not tested or debugged, nor am I planning to. That being said, I won't recommend using this for production applications, I made this to reinforce some of my knowledge, didn't put too much time in it and it will not be maintained. Use Tensorflow, or pytorch**
+**NB: This has been tested, on simple data for classification tasks, which seems to work for binary and multi-class. I did write an MSE loss for regression tasks, but it was not tested or debugged, nor am I planning to. That being said, I won't recommend using this for production applications, I made this to reinforce some of my knowledge, future projects will be done using tensorflow.**
